@@ -40,9 +40,9 @@ def triple_translator_node(state: AgentState):
     system_instructions = (
         "You are a professional translator and expert polyglot. For each Portuguese sentence provided, create 3 English versions. "
         "Choose the 3 best stylistic variations that fit the context of the sentence. "
-        "Ensure each version is numbered (1., 2., 3.) inside the list."
+        "Return the versions as a plain list of strings. Do NOT add numbers (1., 2., etc.) inside the strings."
         "\n\nRespond ONLY with a JSON array of objects. Structure:"
-        '\n[{"original": "...", "versions": ["1. Version A", "2. Version B", "3. Version C"]}]'
+        '\n[{"original": "...", "versions": ["Version A", "Version B", "Version C"]}]'
     )
 
     input_list = "\n".join(state['sentences'])
@@ -72,16 +72,35 @@ workflow.add_edge("translator", END)
 
 app = workflow.compile()
 
+compiled_list = []
+
 while True:
-    user_input = input("\n =>: /n")
+    user_input = input("\n =>: ")
 
     if user_input.lower() in ["q", "exit"]:
-        print("Closing the application")
+        print("="*40)
+        for i, item in enumerate(compiled_list, 1):
+            print(f"{i}. {item}")
+        print("\nClosing...")
         break
 
     result = app.invoke({"original_text": user_input})
 
     for entry in result['final_results']:
-        for version in entry.get('versions', []):
-            print(f"  {version}")
+        versions = entry.get('versions', [])
+        
+        for idx, version in enumerate(versions, 1):
+            print(f"[{idx}] {version}")
+        
+        choice = input("\n Select versions to save or Enter to skip: ")
+        
+        if choice.strip():
+            indices = [int(x.strip()) for x in choice.split(',') if x.strip().isdigit()]
+            
+            for index in indices:
+                if 1 <= index <= len(versions):
+                    selected_text = versions[index-1]
+                    compiled_list.append(selected_text)
+                    print(f"-> Added to list: {selected_text[:40]}...")
+        
         print("-" * 20)
