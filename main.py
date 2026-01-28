@@ -9,9 +9,10 @@ from langchain_core.messages import HumanMessage, SystemMessage
 load_dotenv()
 llm = ChatGroq(
     temperature=0,
-    model_name="openai/gpt-oss-120b",
+    model_name="openai/gpt-oss-120b", 
     groq_api_key=os.getenv("GROQ_API_KEY") 
 )
+
 class AgentState(TypedDict):
     original_text: str
     sentences: List[str]
@@ -37,9 +38,8 @@ def sentence_splitter_node(state: AgentState):
 
 def triple_translator_node(state: AgentState):
     system_instructions = (
-        "You are a professional translator and expert polyglot.. For each Portuguese sentence provided, create 3 English versions. "
-        "distinct and natural English translations. Do not follow fixed categories like 'formal' or 'slang'; "
-        "instead, choose the 3 best stylistic variations that fit the context of the sentence. "
+        "You are a professional translator and expert polyglot. For each Portuguese sentence provided, create 3 English versions. "
+        "Choose the 3 best stylistic variations that fit the context of the sentence. "
         "Ensure each version is numbered (1., 2., 3.) inside the list."
         "\n\nRespond ONLY with a JSON array of objects. Structure:"
         '\n[{"original": "...", "versions": ["1. Version A", "2. Version B", "3. Version C"]}]'
@@ -60,23 +60,28 @@ def triple_translator_node(state: AgentState):
     except Exception as e:
         print(f"Error parsing JSON: {e}")
         return {"final_results": []}
-    
-
 
 workflow = StateGraph(AgentState)
+
 workflow.add_node("splitter", sentence_splitter_node)
 workflow.add_node("translator", triple_translator_node)
+
 workflow.add_edge(START, "splitter")
 workflow.add_edge("splitter", "translator")
 workflow.add_edge("translator", END)
 
 app = workflow.compile()
 
-input_text = "O aprendizado de máquina é fascinante. Eu adoro construir grafos de agentes. O café está pronto."
-result = app.invoke({"original_text": input_text})
+while True:
+    user_input = input("\n =>: /n")
 
-for vs in result['final_results']:
-    for v in vs["versions"]:
-        print(v)
+    if user_input.lower() in ["q", "exit"]:
+        print("Closing the application")
+        break
+
+    result = app.invoke({"original_text": user_input})
+
+    for entry in result['final_results']:
+        for version in entry.get('versions', []):
+            print(f"  {version}")
         print("-" * 20)
-
