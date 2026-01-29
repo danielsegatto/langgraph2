@@ -11,7 +11,7 @@ def sentence_splitter_node(state: AgentState, llm):
     )
     response = llm.invoke([
         SystemMessage(content=system_instructions),
-        HumanMessage(content=f"SENTENCE: '{state['original_text']}'")
+        HumanMessage(content=f"SENTENCE => '{state['original_text']}'")
     ])
     data = json.loads(response.content)
     return {"sentences": data.get("sentences", [])}
@@ -27,7 +27,7 @@ def triple_translator_node(state: AgentState, llm):
     input_list = "\n".join(state['sentences'])
     response = llm.invoke([
         SystemMessage(content=system_instructions),
-        HumanMessage(content=f"TRANSLATE: {input_list}")
+        HumanMessage(content=f"TRANSLATE => '{input_list}'")
     ])
     data = json.loads(response.content)
     return {"final_results": data.get("results", [])}
@@ -42,7 +42,7 @@ def style_refiner_node(state: AgentState, llm):
     )
     response = llm.invoke([
         SystemMessage(content=system_instructions),
-        HumanMessage(content=f"REFINE: {state['refinement_text']}")
+        HumanMessage(content=f"REFINE => '{state['refinement_text']}'")
     ])
     data = json.loads(response.content)
     return {"final_results": data.get("results", [])}
