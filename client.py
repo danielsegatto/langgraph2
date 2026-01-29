@@ -37,7 +37,6 @@ def handle_refinement(action, current_results):
         idx = int(action[1:]) - 1
         # Assumes working with the first entry's versions
         selected = current_results[0]['versions'][idx]
-        print(f"--- Refining via API: '{selected[:30]}...' ---")
         return refine_api(selected)
     except (ValueError, IndexError):
         print("Invalid refinement choice. Use 'r1', 'r2', etc.")
