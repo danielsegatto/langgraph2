@@ -23,6 +23,12 @@ def process_save_action(action, current_results, compiled_list):
             if 1 <= index <= len(versions):
                 saved_text = versions[index-1]
                 compiled_list.append(saved_text)
-                print(f"   -> Salvo localmente: {saved_text[:40]}...")
+                print(f"   -> Saved: {saved_text[:40]}...")
     except Exception:
         print("Seleção inválida.")
+
+def display_final_list (sentences):
+    print("\n")
+    for sentence in sentences:
+        print(sentence)
+    print("\n")

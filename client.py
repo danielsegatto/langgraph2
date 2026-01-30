@@ -54,4 +54,4 @@ if __name__ == "__main__":
         results = translate_api(user_input)
         interaction_loop(results, saved_sentences)
     
-    print("\nFINAL SAVED LIST:", saved_sentences)
+ui.display_final_list(saved_sentences)
